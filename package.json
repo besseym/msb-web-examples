@@ -1,0 +1,31 @@
+{
+  "name": "msb-web-examples",
+  "version": "1.0.0",
+  "description": "Examples using the msb-web library",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "tslint": "^5.1.0",
+    "ts-loader": "^2.0.3",
+    "typescript": "^2.2.2",
+    "webpack": "^2.4.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/besseym/msb-web-examples.git"
+  },
+  "keywords": [
+    "msb",
+    "web",
+    "examples"
+  ],
+  "author": "Michael Bessey",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/besseym/msb-web-examples/issues"
+  },
+  "homepage": "https://github.com/besseym/msb-web-examples#readme"
+}
