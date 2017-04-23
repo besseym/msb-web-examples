@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dimension: 2d Example</title>
+
+    <style>
+
+        #stage {
+            border: 1px solid black;
+        }
+
+    </style>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+
+        uniform int u_SceneId;
+
+        attribute vec4 a_Position_1;
+        attribute vec4 a_Color_1;
+
+        varying vec4 v_Color;
+
+        void
+        main()
+        {
+            gl_Position = a_Position_1;
+            v_Color = a_Color_1;
+        }
+
+    </script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+
+        precision mediump float;
+
+        uniform vec2 u_Resolution;
+
+        varying vec4 v_Color;
+
+        void
+        main()
+        {
+            //gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+            gl_FragColor = v_Color;
+        }
+
+    </script>
+
+</head>
+<body>
+
+<h1>Dimension: 2d Example</h1>
+
+<canvas id="stage" width="512" height="512">
+    Your browser does not support canvas.
+</canvas>
+
+<script type="text/javascript" src="/msb-web-examples/scripts/dimd2.js"></script>
+
+</body>
+</html>

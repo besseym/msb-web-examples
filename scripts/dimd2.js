@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -3315,8 +3315,61 @@ exports.NatureWave = NatureWave;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var msb_web_1 = __webpack_require__(0);
+function buildRectangleScene(gl) {
+    var scene = new msb_web_1.DimScene(), model, circleModelBuilder = new msb_web_1.DimCircleModelBuilder(), rectangleModelBuilder = new msb_web_1.DimRectangleModelBuilder(), triangleModelBuilder = new msb_web_1.DimTriangleModelBuilder();
+    scene.colorSize = 4;
+    circleModelBuilder.color = msb_web_1.ColorRGB.getRandom();
+    model = circleModelBuilder.buildModel(gl);
+    scene.modelArray.push(model);
+    rectangleModelBuilder.color = msb_web_1.ColorRGB.getRandom();
+    model = rectangleModelBuilder.buildModel(gl);
+    scene.modelArray.push(model);
+    triangleModelBuilder.color = msb_web_1.ColorRGB.getRandom();
+    model = triangleModelBuilder.buildModel(gl);
+    scene.modelArray.push(model);
+    return scene;
+}
+exports.buildRectangleScene = buildRectangleScene;
+
+
+/***/ }),
+/* 2 */,
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var msb_web_1 = __webpack_require__(0);
+var factory_1 = __webpack_require__(1);
 (function () {
-    console.log("hello dim", msb_web_1.radians2degrees(Math.PI));
+    var gl, program, uSceneId, uResolution, scene1, scene2;
+    function init() {
+        var stage = document.getElementById("stage");
+        if (stage === undefined) {
+            throw "unable to find stage";
+        }
+        gl = msb_web_1.getWebGLRenderingContext(stage);
+        if (!gl) {
+            throw "Graphics context isn't available.";
+        }
+        gl.viewport(0, 0, stage.width, stage.height);
+        gl.clearColor(0.8, 0.8, 0.8, 1.0);
+        program = msb_web_1.compileShaders(gl, "vertex-shader", "fragment-shader");
+        gl.useProgram(program);
+        uSceneId = gl.getUniformLocation(program, "u_SceneId");
+        uResolution = gl.getUniformLocation(program, "u_Resolution");
+        gl.uniform2fv(uResolution, new Float32Array([stage.width, stage.height]));
+        scene1 = factory_1.buildRectangleScene(gl);
+        scene1.init(gl, program);
+    }
+    function render() {
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        scene1.render(gl);
+        // window.requestAnimationFrame(render);
+    }
+    init();
+    render();
 }());
 
 

@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -3308,15 +3308,92 @@ exports.NatureWave = NatureWave;
 });
 
 /***/ }),
-/* 1 */
+/* 1 */,
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var msb_web_1 = __webpack_require__(0);
+function buildScene(gl) {
+    var scene = new msb_web_1.DimScene(), model, cubeModelBuilder = new msb_web_1.DimCubeModelBuilder();
+    scene.hasTransformation = true;
+    scene.hasMaterial = true;
+    scene.normalSize = 3;
+    cubeModelBuilder.hasNormals = true;
+    cubeModelBuilder.material = msb_web_1.Material.emerald();
+    model = cubeModelBuilder.buildModel(gl);
+    model.matrix.translationX = -1;
+    scene.modelArray.push(model);
+    cubeModelBuilder.hasNormals = true;
+    cubeModelBuilder.material = msb_web_1.Material.ruby();
+    model = cubeModelBuilder.buildModel(gl);
+    model.matrix.translationX = 1;
+    scene.modelArray.push(model);
+    return scene;
+}
+exports.buildScene = buildScene;
+
+
+/***/ }),
+/* 3 */,
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by mm28969 on 4/23/17.
+ */
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var msb_web_1 = __webpack_require__(0);
+var factory_1 = __webpack_require__(2);
 (function () {
-    console.log("hello dim", msb_web_1.radians2degrees(Math.PI));
+    var gl, program, uSceneId, uResolution, scene1, scene2;
+    function init() {
+        var stage = document.getElementById("stage");
+        if (stage === undefined) {
+            throw "unable to find stage";
+        }
+        gl = msb_web_1.getWebGLRenderingContext(stage);
+        if (!gl) {
+            throw "Graphics context isn't available.";
+        }
+        gl.viewport(0, 0, stage.width, stage.height);
+        gl.clearColor(0.8, 0.8, 0.8, 1.0);
+        // gl.enable(gl.BLEND);
+        gl.enable(gl.DEPTH_TEST);
+        program = msb_web_1.compileShaders(gl, "vertex-shader", "fragment-shader");
+        gl.useProgram(program);
+        uSceneId = gl.getUniformLocation(program, "u_SceneId");
+        uResolution = gl.getUniformLocation(program, "u_Resolution");
+        gl.uniform2fv(uResolution, new Float32Array([stage.width, stage.height]));
+        var eye = new msb_web_1.DimEye();
+        eye.position = new msb_web_1.Vector(0.0, 0.0, 4.0);
+        eye.init(gl, program);
+        eye.render(gl);
+        var aspect = stage.width / stage.height, projection = new msb_web_1.DimPerspectiveProjection(aspect);
+        // projection = new DimOrthographicProjection(aspect);
+        projection.near = 0.2;
+        projection.far = 30.0;
+        projection.init(gl, program);
+        projection.render(gl);
+        var light = msb_web_1.DimLight.starter();
+        light.position = new msb_web_1.Vector(0.0, 0.0, 5.0);
+        light.init(gl, program);
+        light.render(gl);
+        scene1 = factory_1.buildScene(gl);
+        scene1.init(gl, program);
+    }
+    function render() {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        scene1.render(gl);
+        scene1.rotate();
+        window.requestAnimationFrame(render);
+    }
+    init();
+    render();
 }());
 
 

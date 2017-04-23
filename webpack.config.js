@@ -1,6 +1,7 @@
 module.exports = {
   entry: {
-    dim: "./src/ts/dim/index.ts"
+    dimd2: "./src/ts/dim/d2/index.ts",
+    dimd3: "./src/ts/dim/d3/index.ts"
   },
   output: {
     path: __dirname + "/scripts",

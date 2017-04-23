@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dimension: 3d Example</title>
+
+    <style>
+
+        #stage {
+            border: 1px solid black;
+        }
+
+    </style>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+
+        uniform mat4 u_ViewMatrix;
+        uniform mat4 u_ProjectionMatrix;
+
+        uniform vec3 u_LightPosition_1;
+        uniform vec4 u_LightAmbient_1, u_LightDiffuse_1, u_LightSpecular_1;
+
+        uniform mat4 u_TranslationMatrix_1;
+        uniform mat4 u_RotationMatrixX_1;
+        uniform mat4 u_RotationMatrixY_1;
+        uniform mat4 u_RotationMatrixZ_1;
+        uniform mat4 u_ScaleMatrix_1;
+
+        uniform vec4 u_Ambient_1, u_Diffuse_1, u_Specular_1;
+        uniform float u_Shininess_1;
+
+        attribute vec4 a_Position_1;
+        //attribute vec4 a_Color_1;
+        attribute vec3 a_Normal_1;
+
+        varying vec4 v_Color;
+
+        vec3 calculateLightingColor(mat4 modelMatrix, vec4 iAmbient, vec4 iDiffuse, vec4 iSpecular, float iShininess, vec3 iLightPosition){
+
+            vec4 p = a_Position_1;
+            vec3 pos = (modelMatrix * p).xyz;
+            vec3 light = iLightPosition.xyz;
+            vec3 L = normalize( light - pos );
+
+            vec4 NN = vec4(a_Normal_1,0);
+            vec3 N = normalize((modelMatrix*NN).xyz);
+
+            float Kd = max(dot(L, N), 0.0 );
+            vec3 diffuse = Kd * iDiffuse.rgb;
+
+            float Ks = pow( max(dot(L, N), 0.0), iShininess );
+            vec3 specular = Ks * iSpecular.rgb;
+
+            return vec3(specular + diffuse + iAmbient.rgb);
+        }
+
+        void
+        main()
+        {
+
+            mat4 modelMatrix = u_TranslationMatrix_1 * u_RotationMatrixX_1 * u_RotationMatrixY_1 * u_RotationMatrixZ_1 * u_ScaleMatrix_1;
+
+            gl_Position = u_ProjectionMatrix * u_ViewMatrix * modelMatrix * a_Position_1;
+            //gl_Position = a_Position_1;
+
+            vec4 ambient1 = u_LightAmbient_1 * u_Ambient_1;
+            vec4 diffuse1 = u_LightDiffuse_1 * u_Diffuse_1;
+            vec4 specular1 = u_LightSpecular_1 * u_Specular_1;
+
+            vec3 lightColor = calculateLightingColor(modelMatrix, ambient1, diffuse1, specular1, u_Shininess_1, u_LightPosition_1);
+            v_Color = vec4(lightColor, 1.0);
+        }
+
+    </script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+
+        precision mediump float;
+
+        uniform vec2 u_Resolution;
+
+        varying vec4 v_Color;
+
+        void
+        main()
+        {
+            //gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+            gl_FragColor = v_Color;
+        }
+
+    </script>
+
+</head>
+<body>
+
+<h1>Dimension: 3d Example</h1>
+
+<canvas id="stage" width="512" height="512">
+    Your browser does not support canvas.
+</canvas>
+
+<script type="text/javascript" src="/msb-web-examples/scripts/dimd3.js"></script>
+
+</body>
+</html>
