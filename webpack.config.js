@@ -8,6 +8,7 @@ module.exports = {
     natureFriction: "./src/ts/nature/friction/index.ts",
     natureMover: "./src/ts/nature/mover/index.ts",
     natureOscillation: "./src/ts/nature/oscillation/index.ts",
+    natureParticleSystem: "./src/ts/nature/particle/system/index.ts",
     naturePendulum: "./src/ts/nature/pendulum/index.ts",
     natureRotation: "./src/ts/nature/rotation/index.ts",
     natureSpring: "./src/ts/nature/spring/index.ts",
