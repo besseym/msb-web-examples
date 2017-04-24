@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 12);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -921,7 +921,7 @@ var NatureParticle = (function (_super) {
     function NatureParticle() {
         var _this = _super.call(this) || this;
         _this.lifeSpan = 120;
-        _this.fillColor = msb_gl_1.ColorRGB.getRandom();
+        _this.fillColor = msb_gl_1.ColorRGB.getRandomInteger();
         return _this;
     }
     NatureParticle.prototype.isDead = function () {
@@ -3492,7 +3492,7 @@ exports.mouseElementLocation = mouseElementLocation;
 
 /***/ }),
 
-/***/ 11:
+/***/ 12:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

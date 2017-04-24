@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 14);
+/******/ 	return __webpack_require__(__webpack_require__.s = 15);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -921,7 +921,7 @@ var NatureParticle = (function (_super) {
     function NatureParticle() {
         var _this = _super.call(this) || this;
         _this.lifeSpan = 120;
-        _this.fillColor = msb_gl_1.ColorRGB.getRandom();
+        _this.fillColor = msb_gl_1.ColorRGB.getRandomInteger();
         return _this;
     }
     NatureParticle.prototype.isDead = function () {
@@ -3492,7 +3492,7 @@ exports.mouseElementLocation = mouseElementLocation;
 
 /***/ }),
 
-/***/ 14:
+/***/ 15:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3507,7 +3507,7 @@ wave.location.y = stageCenter.y;
 wave.amplitude = stageCenter.y * 0.25;
 wave.period = stage.width * 0.7;
 wave.increment = wave.period / 50;
-wave.strokeStyle = msb_web_1.ColorRGB.getRandomInteger().toString(); //"purple";
+wave.strokeStyle = msb_web_1.ColorRGB.getRandomInteger().toString();
 function render() {
     context.clearRect(0, 0, stage.width, stage.height);
     wave.draw(context);
