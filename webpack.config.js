@@ -10,7 +10,8 @@ module.exports = {
     natureOscillation: "./src/ts/nature/oscillation/index.ts",
     naturePendulum: "./src/ts/nature/pendulum/index.ts",
     natureRotation: "./src/ts/nature/rotation/index.ts",
-    natureSpring: "./src/ts/nature/spring/index.ts"
+    natureSpring: "./src/ts/nature/spring/index.ts",
+    natureWave: "./src/ts/nature/wave/index.ts"
   },
   output: {
     path: __dirname + "/scripts",
