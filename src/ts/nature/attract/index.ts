@@ -1,15 +1,3 @@
-// import {normalGaussianGenerator, createIntegerRangeRandomGenerator, createRangeRandomGenerator}
-//     from "../bower_components/msb-viz/src/ts/msb/math/utility";
-// import Vector from "../bower_components/msb-viz/src/ts/msb/math/vector";
-
-// import {mouseToCanvas} from "../bower_components/msb-viz/src/ts/msb/graphics/utility";
-// import {ColorRGB, ColorHSL} from "../bower_components/msb-viz/src/ts/msb/graphics/color";
-// import Container from "../bower_components/msb-viz/src/ts/msb/graphics/container";
-
-// import Circle from "../bower_components/msb-viz/src/ts/msb/graphics/raster/circle";
-// import Rectangle from "../bower_components/msb-viz/src/ts/msb/graphics/raster/rectangle";
-
-// import Actor from "../bower_components/msb-viz/src/ts/msb/nature/elements/actor";
 
 import {
     ColorRGB,

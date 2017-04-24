@@ -3486,17 +3486,8 @@ exports.mouseElementLocation = mouseElementLocation;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-// import {normalGaussianGenerator, createIntegerRangeRandomGenerator, createRangeRandomGenerator}
-//     from "../bower_components/msb-viz/src/ts/msb/math/utility";
-// import Vector from "../bower_components/msb-viz/src/ts/msb/math/vector";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-// import {mouseToCanvas} from "../bower_components/msb-viz/src/ts/msb/graphics/utility";
-// import {ColorRGB, ColorHSL} from "../bower_components/msb-viz/src/ts/msb/graphics/color";
-// import Container from "../bower_components/msb-viz/src/ts/msb/graphics/container";
-// import Circle from "../bower_components/msb-viz/src/ts/msb/graphics/raster/circle";
-// import Rectangle from "../bower_components/msb-viz/src/ts/msb/graphics/raster/rectangle";
-// import Actor from "../bower_components/msb-viz/src/ts/msb/nature/elements/actor";
 var msb_web_1 = __webpack_require__(0);
 var stage = document.getElementById("stage"), context = stage.getContext("2d"), k = 0, wCount = 100, mass, massGenerator = msb_web_1.normalGaussianGenerator(10.0, 2.0), color, circle, actor, actorArray = [], stageContainer = new msb_web_1.Container(0, stage.width, 0, stage.height), doAttract = true;
 while (k < wCount) {
