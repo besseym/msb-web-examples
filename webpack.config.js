@@ -6,7 +6,10 @@ module.exports = {
     natureDrag: "./src/ts/nature/drag/index.ts",
     natureClock: "./src/ts/nature/clock/index.ts",
     natureFriction: "./src/ts/nature/friction/index.ts",
-    natureMover: "./src/ts/nature/mover/index.ts"
+    natureMover: "./src/ts/nature/mover/index.ts",
+    natureOscillation: "./src/ts/nature/oscillation/index.ts",
+    naturePendulum: "./src/ts/nature/pendulum/index.ts",
+    natureRotation: "./src/ts/nature/rotation/index.ts"
   },
   output: {
     path: __dirname + "/scripts",
