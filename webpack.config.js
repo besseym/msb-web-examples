@@ -5,6 +5,7 @@ module.exports = {
     natureAttract: "./src/ts/nature/attract/index.ts",
     natureDrag: "./src/ts/nature/drag/index.ts",
     natureClock: "./src/ts/nature/clock/index.ts",
+    natureFriction: "./src/ts/nature/friction/index.ts",
     natureMover: "./src/ts/nature/mover/index.ts"
   },
   output: {
