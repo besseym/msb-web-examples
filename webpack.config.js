@@ -2,6 +2,7 @@ module.exports = {
   entry: {
     dimd2: "./src/ts/dim/d2/index.ts",
     dimd3: "./src/ts/dim/d3/index.ts",
+    nature: "./src/ts/dim/nature/index.ts",
     natureAttract: "./src/ts/nature/attract/index.ts",
     natureDrag: "./src/ts/nature/drag/index.ts",
     natureClock: "./src/ts/nature/clock/index.ts",

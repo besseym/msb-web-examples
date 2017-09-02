@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -175,6 +175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var index_3 = __webpack_require__(39);
 	exports.NatureActor = index_3.NatureActor;
 	exports.NatureClock = index_3.NatureClock;
+	exports.NatureContainer = index_3.NatureContainer;
 	exports.NatureMover = index_3.NatureMover;
 	exports.NatureOscillator = index_3.NatureOscillator;
 	exports.NatureParticle = index_3.NatureParticle;
@@ -184,8 +185,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.NatureSpring = index_3.NatureSpring;
 	exports.NatureWalker = index_3.NatureWalker;
 	exports.NatureWave = index_3.NatureWave;
+	exports.NatureDimActor = index_3.NatureDimActor;
+	exports.NatureDimScene = index_3.NatureDimScene;
 	//msb-nature
-	var index_4 = __webpack_require__(53);
+	var index_4 = __webpack_require__(57);
 	exports.mouseElementLocation = index_4.mouseElementLocation;
 
 
@@ -206,6 +209,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.createProgramByShaderElements = index_2.createProgramByShaderElements;
 	exports.DimEye = index_2.DimEye;
 	exports.DimLight = index_2.DimLight;
+	exports.DimModel = index_2.DimModel;
 	exports.DimOrthographicProjection = index_2.DimOrthographicProjection;
 	exports.DimPerspectiveProjection = index_2.DimPerspectiveProjection;
 	exports.DimScene = index_2.DimScene;
@@ -2599,6 +2603,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.NatureWalker = walker_1.NatureWalker;
 	var wave_1 = __webpack_require__(52);
 	exports.NatureWave = wave_1.NatureWave;
+	var container_1 = __webpack_require__(53);
+	exports.NatureContainer = container_1.NatureContainer;
+	var dim_1 = __webpack_require__(54);
+	exports.NatureDimActor = dim_1.NatureDimActor;
+	exports.NatureDimScene = dim_1.NatureDimScene;
 
 
 /***/ },
@@ -3390,6 +3399,112 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 53 */
+/***/ function(module, exports) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var NatureContainer = (function () {
+	    function NatureContainer(container) {
+	        this.container = container;
+	        this.constrainBounce = false;
+	        this.constrainPassThrough = false;
+	    }
+	    NatureContainer.prototype.contain = function (mover) {
+	        if (this.constrainBounce && this.container) {
+	            mover.applyBounce(this.container);
+	        }
+	        else if (this.constrainPassThrough && this.container) {
+	            mover.applyPassThrough(this.container);
+	        }
+	    };
+	    return NatureContainer;
+	}());
+	exports.NatureContainer = NatureContainer;
+
+
+/***/ },
+/* 54 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var actor_1 = __webpack_require__(55);
+	exports.NatureDimActor = actor_1.NatureDimActor;
+	var scene_1 = __webpack_require__(56);
+	exports.NatureDimScene = scene_1.NatureDimScene;
+
+
+/***/ },
+/* 55 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var mover_1 = __webpack_require__(41);
+	var NatureDimActor = (function (_super) {
+	    __extends(NatureDimActor, _super);
+	    function NatureDimActor(body) {
+	        var _this = _super.call(this) || this;
+	        _this.body = body;
+	        return _this;
+	    }
+	    NatureDimActor.prototype.update = function () {
+	        _super.prototype.update.call(this);
+	        this.body.matrix.translationX = this.location.x;
+	        this.body.matrix.translationY = this.location.y;
+	        this.body.matrix.translationZ = this.location.z;
+	    };
+	    return NatureDimActor;
+	}(mover_1.NatureMover));
+	exports.NatureDimActor = NatureDimActor;
+
+
+/***/ },
+/* 56 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var msb_gl_1 = __webpack_require__(1);
+	var NatureDimScene = (function () {
+	    function NatureDimScene() {
+	        this.scene = new msb_gl_1.DimScene();
+	        this.actorArray = [];
+	    }
+	    NatureDimScene.prototype.addActor = function (actor) {
+	        this.actorArray.push(actor);
+	        this.scene.modelArray.push(actor.body);
+	    };
+	    NatureDimScene.prototype.update = function () {
+	        var actor;
+	        for (var _i = 0, _a = this.actorArray; _i < _a.length; _i++) {
+	            actor = _a[_i];
+	            actor.update();
+	            if (this.container) {
+	                this.container.contain(actor);
+	            }
+	        }
+	    };
+	    NatureDimScene.prototype.render = function (gl) {
+	        this.scene.render(gl);
+	    };
+	    return NatureDimScene;
+	}());
+	exports.NatureDimScene = NatureDimScene;
+
+
+/***/ },
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3397,12 +3512,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	"use strict";
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var utility_1 = __webpack_require__(54);
+	var utility_1 = __webpack_require__(58);
 	exports.mouseElementLocation = utility_1.mouseElementLocation;
 
 
 /***/ },
-/* 54 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -3450,7 +3565,8 @@ exports.buildRectangleScene = buildRectangleScene;
 
 /***/ }),
 /* 2 */,
-/* 3 */
+/* 3 */,
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3459,7 +3575,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var msb_web_1 = __webpack_require__(0);
 var factory_1 = __webpack_require__(1);
 (function () {
-    var vertexShaderSrc = "\n        \n            uniform int u_SceneId;\n    \n            attribute vec4 a_Position_1;\n            attribute vec4 a_Color_1;\n    \n            varying vec4 v_Color;\n    \n            void\n            main()\n            {\n                gl_Position = a_Position_1;\n                v_Color = a_Color_1;\n            }\n        ", fragmentShaderSrc = "\n            \n            precision mediump float;\n\n            uniform vec2 u_Resolution;\n    \n            varying vec4 v_Color;\n    \n            void\n            main()\n            {\n                //gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);\n                gl_FragColor = v_Color;\n            }\n        ";
+    var vertexShaderSrc = "\n        \n            uniform int u_SceneId;\n    \n            attribute vec4 a_Position_1;\n            attribute vec4 a_Color_1;\n    \n            varying vec4 v_Color;\n    \n            void\n            main()\n            {\n                gl_Position = a_Position_1;\n                v_Color = a_Color_1;\n            }\n        ", fragmentShaderSrc = "\n            \n            precision mediump float;\n    \n            varying vec4 v_Color;\n    \n            void\n            main()\n            {\n                gl_FragColor = v_Color;\n            }\n        ";
     var gl, program, uSceneId, uResolution, scene1, scene2;
     function init() {
         var stage = document.getElementById("stage");

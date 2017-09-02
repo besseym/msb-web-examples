@@ -1,18 +1,19 @@
-
 import {
     createProgram,
     createProgramByShaderElements,
     getWebGLRenderingContext
 } from "msb-web";
 
-import {buildRectangleScene} from "./factory";
+import {buildScene} from "./scene";
 
 (function(){
 
     let vertexShaderSrc = `
         
             uniform int u_SceneId;
-    
+            
+            uniform mat4 u_TranslationMatrix_1;
+            
             attribute vec4 a_Position_1;
             attribute vec4 a_Color_1;
     
@@ -21,7 +22,9 @@ import {buildRectangleScene} from "./factory";
             void
             main()
             {
-                gl_Position = a_Position_1;
+                mat4 modelMatrix = u_TranslationMatrix_1;
+            
+                gl_Position = modelMatrix * a_Position_1;
                 v_Color = a_Color_1;
             }
         `,
@@ -41,7 +44,7 @@ import {buildRectangleScene} from "./factory";
     let gl: WebGLRenderingContext,
         program: WebGLProgram,
         uSceneId, uResolution,
-        scene1, scene2;
+        natureScene;
 
     function init(): void {
 
@@ -67,16 +70,18 @@ import {buildRectangleScene} from "./factory";
         uResolution = gl.getUniformLocation(program, "u_Resolution");
         gl.uniform2fv(uResolution, new Float32Array([stage.width, stage.height]));
 
-        scene1 = buildRectangleScene(gl);
-        scene1.init(gl, program);
+        natureScene = buildScene(gl);
+        natureScene.scene.init(gl, program);
     }
 
     function render(): void {
 
         gl.clear(gl.COLOR_BUFFER_BIT);
-        scene1.render(gl);
 
-        // window.requestAnimationFrame(render);
+        natureScene.update();
+        natureScene.render(gl);
+
+        window.requestAnimationFrame(render);
     }
 
     init();

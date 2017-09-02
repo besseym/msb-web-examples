@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -3540,7 +3540,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ }),
 /* 1 */,
-/* 2 */
+/* 2 */,
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3548,41 +3549,42 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", { value: true });
 var msb_web_1 = __webpack_require__(0);
 function buildScene(gl) {
-    var scene = new msb_web_1.DimScene(), model, cubeModelBuilder = new msb_web_1.DimCubeModelBuilder();
-    scene.hasTransformation = true;
-    scene.hasMaterial = true;
-    scene.normalSize = 3;
-    cubeModelBuilder.hasNormals = true;
-    cubeModelBuilder.material = msb_web_1.Material.emerald();
-    model = cubeModelBuilder.buildModel(gl);
-    model.matrix.translationX = -1;
-    scene.modelArray.push(model);
-    cubeModelBuilder.hasNormals = true;
-    cubeModelBuilder.material = msb_web_1.Material.ruby();
-    model = cubeModelBuilder.buildModel(gl);
-    model.matrix.translationX = 1;
-    scene.modelArray.push(model);
-    return scene;
+    var natureScene = new msb_web_1.NatureDimScene(), model, actor, mass, circleModelBuilder = new msb_web_1.DimCircleModelBuilder(0.5, 5), stageContainer = new msb_web_1.Container(-1.0, 1.0, -1.0, 1.0), forceContainer = new msb_web_1.Container(-0.001, 0.001, -0.001, 0.001), massGenerator = msb_web_1.normalGaussianGenerator(0.01, 0.05);
+    natureScene.scene.colorSize = 4;
+    natureScene.scene.hasTransformation = true;
+    natureScene.container = new msb_web_1.NatureContainer(stageContainer);
+    natureScene.container.constrainBounce = true;
+    for (var a = 0; a < 50; a++) {
+        mass = massGenerator();
+        circleModelBuilder.radius = mass;
+        circleModelBuilder.color = msb_web_1.ColorRGB.getRandom();
+        model = circleModelBuilder.buildModel(gl);
+        actor = new msb_web_1.NatureDimActor(model);
+        actor.location = msb_web_1.Vector.getRandom(stageContainer);
+        actor.speedLimit = 0.05;
+        actor.mass = mass;
+        actor.applyForce(msb_web_1.Vector.getRandom(forceContainer));
+        natureScene.addActor(actor);
+    }
+    return natureScene;
 }
 exports.buildScene = buildScene;
 
 
 /***/ }),
-/* 3 */,
 /* 4 */,
-/* 5 */
+/* 5 */,
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/**
- * Created by mm28969 on 4/23/17.
- */
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var msb_web_1 = __webpack_require__(0);
-var factory_1 = __webpack_require__(2);
+var scene_1 = __webpack_require__(3);
 (function () {
-    var gl, program, uSceneId, uResolution, scene1, scene2;
+    var vertexShaderSrc = "\n        \n            uniform int u_SceneId;\n            \n            uniform mat4 u_TranslationMatrix_1;\n            \n            attribute vec4 a_Position_1;\n            attribute vec4 a_Color_1;\n    \n            varying vec4 v_Color;\n    \n            void\n            main()\n            {\n                mat4 modelMatrix = u_TranslationMatrix_1;\n            \n                gl_Position = modelMatrix * a_Position_1;\n                v_Color = a_Color_1;\n            }\n        ", fragmentShaderSrc = "\n            \n            precision mediump float;\n    \n            varying vec4 v_Color;\n    \n            void\n            main()\n            {\n                gl_FragColor = v_Color;\n            }\n        ";
+    var gl, program, uSceneId, uResolution, natureScene;
     function init() {
         var stage = document.getElementById("stage");
         if (stage === undefined) {
@@ -3594,34 +3596,18 @@ var factory_1 = __webpack_require__(2);
         }
         gl.viewport(0, 0, stage.width, stage.height);
         gl.clearColor(0.8, 0.8, 0.8, 1.0);
-        // gl.enable(gl.BLEND);
-        gl.enable(gl.DEPTH_TEST);
-        program = msb_web_1.createProgramByShaderElements(gl, "vertex-shader", "fragment-shader");
+        program = msb_web_1.createProgram(gl, vertexShaderSrc, fragmentShaderSrc);
         gl.useProgram(program);
         uSceneId = gl.getUniformLocation(program, "u_SceneId");
         uResolution = gl.getUniformLocation(program, "u_Resolution");
         gl.uniform2fv(uResolution, new Float32Array([stage.width, stage.height]));
-        var eye = new msb_web_1.DimEye();
-        eye.position = new msb_web_1.Vector(0.0, 0.0, 4.0);
-        eye.init(gl, program);
-        eye.render(gl);
-        var aspect = stage.width / stage.height, projection = new msb_web_1.DimPerspectiveProjection(aspect);
-        // projection = new DimOrthographicProjection(aspect);
-        projection.near = 0.2;
-        projection.far = 30.0;
-        projection.init(gl, program);
-        projection.render(gl);
-        var light = msb_web_1.DimLight.starter();
-        light.position = new msb_web_1.Vector(0.0, 0.0, 5.0);
-        light.init(gl, program);
-        light.render(gl);
-        scene1 = factory_1.buildScene(gl);
-        scene1.init(gl, program);
+        natureScene = scene_1.buildScene(gl);
+        natureScene.scene.init(gl, program);
     }
     function render() {
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        scene1.render(gl);
-        scene1.rotate();
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        natureScene.update();
+        natureScene.render(gl);
         window.requestAnimationFrame(render);
     }
     init();
