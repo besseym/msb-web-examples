@@ -213,6 +213,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.DimOrthographicProjection = index_2.DimOrthographicProjection;
 	exports.DimPerspectiveProjection = index_2.DimPerspectiveProjection;
 	exports.DimScene = index_2.DimScene;
+	exports.DimSceneBase = index_2.DimSceneBase;
+	exports.DimSceneData = index_2.DimSceneData;
 	exports.getWebGLRenderingContext = index_2.getWebGLRenderingContext;
 	var index_3 = __webpack_require__(22);
 	exports.DimCircleModelBuilder = index_3.DimCircleModelBuilder;
@@ -817,6 +819,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.DimModel = model_1.DimModel;
 	var scene_1 = __webpack_require__(21);
 	exports.DimScene = scene_1.DimScene;
+	exports.DimSceneBase = scene_1.DimSceneBase;
+	exports.DimSceneData = scene_1.DimSceneData;
 	var utility_1 = __webpack_require__(15);
 	exports.createProgram = utility_1.createProgram;
 	exports.createProgramByShaderElements = utility_1.createProgramByShaderElements;
@@ -1278,6 +1282,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
+	    DimFace.prototype.toData = function () {
+	        return new DimFaceData(this);
+	    };
 	    return DimFace;
 	}());
 	exports.DimFace = DimFace;
@@ -1311,6 +1318,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.faceArray = [];
 	        this.matrix = new index_1.DimMatrix();
 	    }
+	    DimModel.prototype.toData = function () {
+	        return new DimModelData(this);
+	    };
 	    return DimModel;
 	}());
 	exports.DimModel = DimModel;
@@ -1339,30 +1349,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Created by mm28969 on 4/22/17.
 	 */
 	"use strict";
+	var __extends = (this && this.__extends) || (function () {
+	    var extendStatics = Object.setPrototypeOf ||
+	        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var utility_1 = __webpack_require__(15);
 	var model_1 = __webpack_require__(20);
-	var DimScene = (function () {
-	    function DimScene(id, vertexSize) {
+	var DimSceneBase = (function () {
+	    function DimSceneBase(id, vertexSize) {
 	        if (id === void 0) { id = 1; }
 	        if (vertexSize === void 0) { vertexSize = 3; }
 	        this.id = id;
 	        this.vertexSize = vertexSize;
 	        this.colorSize = 0;
 	        this.normalSize = 0;
-	        this.modelArray = [];
 	        this.hasTransformation = false;
 	        this.hasMaterial = false;
 	    }
-	    Object.defineProperty(DimScene.prototype, "elementSize", {
+	    Object.defineProperty(DimSceneBase.prototype, "elementSize", {
 	        get: function () {
 	            return this.vertexSize + this.colorSize + this.normalSize;
 	        },
 	        enumerable: true,
 	        configurable: true
 	    });
-	    DimScene.prototype.init = function (gl, glProgram) {
-	        var offset = 0, stride = Float32Array.BYTES_PER_ELEMENT * this.elementSize, sceneData = new DimSceneData(this.modelArray);
+	    DimSceneBase.prototype.init = function (gl, glProgram) {
+	        var offset = 0, stride = Float32Array.BYTES_PER_ELEMENT * this.elementSize, sceneData = this.getSceneData();
 	        if (this.hasTransformation) {
 	            this.uTranslationMatrix = gl.getUniformLocation(glProgram, "u_TranslationMatrix_" + this.id);
 	            this.uRotationMatrixX = gl.getUniformLocation(glProgram, "u_RotationMatrixX_" + this.id);
@@ -1392,6 +1411,52 @@ return /******/ (function(modules) { // webpackBootstrap
 	            gl.vertexAttribPointer(this.aNormal, this.normalSize, gl.FLOAT, false, stride, Float32Array.BYTES_PER_ELEMENT * offset);
 	            offset = offset + this.normalSize;
 	        }
+	        gl.enableVertexAttribArray(this.aPosition);
+	        if (this.colorSize > 0) {
+	            gl.enableVertexAttribArray(this.aColor);
+	        }
+	        if (this.normalSize > 0) {
+	            gl.enableVertexAttribArray(this.aNormal);
+	        }
+	    };
+	    DimSceneBase.prototype.renderModel = function (gl, model, elementOffset) {
+	        if (elementOffset === void 0) { elementOffset = 0; }
+	        var face, newElementOffset = elementOffset;
+	        if (this.hasTransformation) {
+	            gl.uniformMatrix4fv(this.uTranslationMatrix, false, utility_1.toDataArray(model.matrix.toTranslationArray()));
+	            gl.uniformMatrix4fv(this.uRotationMatrixX, false, utility_1.toDataArray(model.matrix.toRotationArrayX()));
+	            gl.uniformMatrix4fv(this.uRotationMatrixY, false, utility_1.toDataArray(model.matrix.toRotationArrayY()));
+	            gl.uniformMatrix4fv(this.uRotationMatrixZ, false, utility_1.toDataArray(model.matrix.toRotationArrayZ()));
+	            gl.uniformMatrix4fv(this.uScaleMatrix, false, utility_1.toDataArray(model.matrix.toScaleArray()));
+	        }
+	        for (var _i = 0, _a = model.faceArray; _i < _a.length; _i++) {
+	            face = _a[_i];
+	            if (this.hasMaterial && face.material) {
+	                var material = face.material;
+	                gl.uniform4fv(this.uAmbient, utility_1.toDataArray(material.ambient.toArray()));
+	                gl.uniform4fv(this.uDiffuse, utility_1.toDataArray(material.diffuse.toArray()));
+	                gl.uniform4fv(this.uSpecular, utility_1.toDataArray(material.specular.toArray()));
+	                gl.uniform1f(this.uShininess, material.shininess);
+	            }
+	            gl.drawArrays(face.drawMode, newElementOffset, face.elementCount);
+	            newElementOffset = newElementOffset + face.elementCount;
+	        }
+	        return newElementOffset;
+	    };
+	    return DimSceneBase;
+	}());
+	exports.DimSceneBase = DimSceneBase;
+	var DimScene = (function (_super) {
+	    __extends(DimScene, _super);
+	    function DimScene() {
+	        var _this = _super.call(this) || this;
+	        _this.modelArray = [];
+	        return _this;
+	    }
+	    DimScene.prototype.getSceneData = function () {
+	        var sceneData = new DimSceneData();
+	        sceneData.populate(this.modelArray);
+	        return sceneData;
 	    };
 	    DimScene.prototype.rotate = function () {
 	        var model;
@@ -1401,52 +1466,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    DimScene.prototype.render = function (gl) {
-	        var model, face, elementOffset = 0;
-	        gl.enableVertexAttribArray(this.aPosition);
-	        if (this.colorSize > 0) {
-	            gl.enableVertexAttribArray(this.aColor);
-	        }
-	        if (this.normalSize > 0) {
-	            gl.enableVertexAttribArray(this.aNormal);
-	        }
+	        var model, elementOffset = 0;
 	        for (var _i = 0, _a = this.modelArray; _i < _a.length; _i++) {
 	            model = _a[_i];
-	            if (this.hasTransformation) {
-	                gl.uniformMatrix4fv(this.uTranslationMatrix, false, utility_1.toDataArray(model.matrix.toTranslationArray()));
-	                gl.uniformMatrix4fv(this.uRotationMatrixX, false, utility_1.toDataArray(model.matrix.toRotationArrayX()));
-	                gl.uniformMatrix4fv(this.uRotationMatrixY, false, utility_1.toDataArray(model.matrix.toRotationArrayY()));
-	                gl.uniformMatrix4fv(this.uRotationMatrixZ, false, utility_1.toDataArray(model.matrix.toRotationArrayZ()));
-	                gl.uniformMatrix4fv(this.uScaleMatrix, false, utility_1.toDataArray(model.matrix.toScaleArray()));
-	            }
-	            for (var _b = 0, _c = model.faceArray; _b < _c.length; _b++) {
-	                face = _c[_b];
-	                if (this.hasMaterial && face.material) {
-	                    var material = face.material;
-	                    gl.uniform4fv(this.uAmbient, utility_1.toDataArray(material.ambient.toArray()));
-	                    gl.uniform4fv(this.uDiffuse, utility_1.toDataArray(material.diffuse.toArray()));
-	                    gl.uniform4fv(this.uSpecular, utility_1.toDataArray(material.specular.toArray()));
-	                    gl.uniform1f(this.uShininess, material.shininess);
-	                }
-	                gl.drawArrays(face.drawMode, elementOffset, face.elementCount);
-	                elementOffset = elementOffset + face.elementCount;
-	            }
+	            elementOffset = this.renderModel(gl, model, elementOffset);
 	        }
 	    };
 	    return DimScene;
-	}());
+	}(DimSceneBase));
 	exports.DimScene = DimScene;
 	var DimSceneData = (function () {
-	    function DimSceneData(modelArray) {
+	    function DimSceneData() {
+	        this.elementCount = 0;
+	        this.elementDataArray = [];
+	    }
+	    DimSceneData.prototype.addModelData = function (modelData) {
+	        this.elementDataArray = this.elementDataArray.concat(modelData.elementDataArray);
+	        this.elementCount = this.elementCount + modelData.elementCount;
+	    };
+	    DimSceneData.prototype.populate = function (modelArray) {
 	        var model, modelData;
 	        this.elementCount = 0;
 	        this.elementDataArray = [];
 	        for (var _i = 0, modelArray_1 = modelArray; _i < modelArray_1.length; _i++) {
 	            model = modelArray_1[_i];
 	            modelData = new model_1.DimModelData(model);
-	            this.elementDataArray = this.elementDataArray.concat(modelData.elementDataArray);
-	            this.elementCount = this.elementCount + modelData.elementCount;
+	            this.addModelData(modelData);
 	        }
-	    }
+	    };
 	    return DimSceneData;
 	}());
 	exports.DimSceneData = DimSceneData;
@@ -3436,6 +3483,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 55 */
+/***/ function(module, exports) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var NatureDimActor = (function () {
+	    function NatureDimActor(model, mover) {
+	        this.model = model;
+	        this.mover = mover;
+	    }
+	    NatureDimActor.prototype.update = function () {
+	        this.mover.update();
+	        this.model.matrix.translationX = this.mover.location.x;
+	        this.model.matrix.translationY = this.mover.location.y;
+	        this.model.matrix.translationZ = this.mover.location.z;
+	    };
+	    return NatureDimActor;
+	}());
+	exports.NatureDimActor = NatureDimActor;
+
+
+/***/ },
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3450,56 +3519,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	})();
 	Object.defineProperty(exports, "__esModule", { value: true });
-	var mover_1 = __webpack_require__(41);
-	var NatureDimActor = (function (_super) {
-	    __extends(NatureDimActor, _super);
-	    function NatureDimActor(body) {
+	var msb_gl_1 = __webpack_require__(1);
+	var NatureDimScene = (function (_super) {
+	    __extends(NatureDimScene, _super);
+	    function NatureDimScene() {
 	        var _this = _super.call(this) || this;
-	        _this.body = body;
+	        _this.actorArray = [];
 	        return _this;
 	    }
-	    NatureDimActor.prototype.update = function () {
-	        _super.prototype.update.call(this);
-	        this.body.matrix.translationX = this.location.x;
-	        this.body.matrix.translationY = this.location.y;
-	        this.body.matrix.translationZ = this.location.z;
+	    NatureDimScene.prototype.getSceneData = function () {
+	        var actor, sceneData = new msb_gl_1.DimSceneData();
+	        for (var _i = 0, _a = this.actorArray; _i < _a.length; _i++) {
+	            actor = _a[_i];
+	            sceneData.addModelData(actor.model.toData());
+	        }
+	        return sceneData;
 	    };
-	    return NatureDimActor;
-	}(mover_1.NatureMover));
-	exports.NatureDimActor = NatureDimActor;
-
-
-/***/ },
-/* 56 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var msb_gl_1 = __webpack_require__(1);
-	var NatureDimScene = (function () {
-	    function NatureDimScene() {
-	        this.scene = new msb_gl_1.DimScene();
-	        this.actorArray = [];
-	    }
-	    NatureDimScene.prototype.addActor = function (actor) {
-	        this.actorArray.push(actor);
-	        this.scene.modelArray.push(actor.body);
-	    };
-	    NatureDimScene.prototype.update = function () {
-	        var actor;
+	    NatureDimScene.prototype.updateRender = function (gl) {
+	        var elementOffset = 0, actor;
 	        for (var _i = 0, _a = this.actorArray; _i < _a.length; _i++) {
 	            actor = _a[_i];
 	            actor.update();
 	            if (this.container) {
-	                this.container.contain(actor);
+	                this.container.contain(actor.mover);
 	            }
+	            elementOffset = this.renderModel(gl, actor.model, elementOffset);
 	        }
 	    };
-	    NatureDimScene.prototype.render = function (gl) {
-	        this.scene.render(gl);
-	    };
 	    return NatureDimScene;
-	}());
+	}(msb_gl_1.DimSceneBase));
 	exports.NatureDimScene = NatureDimScene;
 
 
@@ -3548,10 +3596,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var msb_web_1 = __webpack_require__(0);
-function buildScene(gl) {
-    var natureScene = new msb_web_1.NatureDimScene(), model, actor, mass, circleModelBuilder = new msb_web_1.DimCircleModelBuilder(0.5, 5), stageContainer = new msb_web_1.Container(-1.0, 1.0, -1.0, 1.0), forceContainer = new msb_web_1.Container(-0.001, 0.001, -0.001, 0.001), massGenerator = msb_web_1.normalGaussianGenerator(0.01, 0.05);
-    natureScene.scene.colorSize = 4;
-    natureScene.scene.hasTransformation = true;
+function buildScene(gl, program) {
+    var natureScene = new msb_web_1.NatureDimScene(), model, mover, actor, mass, circleModelBuilder = new msb_web_1.DimCircleModelBuilder(0.5, 5), stageContainer = new msb_web_1.Container(-1.0, 1.0, -1.0, 1.0), forceContainer = new msb_web_1.Container(-0.001, 0.001, -0.001, 0.001), massGenerator = msb_web_1.normalGaussianGenerator(0.01, 0.05);
+    natureScene.colorSize = 4;
+    natureScene.hasTransformation = true;
     natureScene.container = new msb_web_1.NatureContainer(stageContainer);
     natureScene.container.constrainBounce = true;
     for (var a = 0; a < 50; a++) {
@@ -3559,13 +3607,15 @@ function buildScene(gl) {
         circleModelBuilder.radius = mass;
         circleModelBuilder.color = msb_web_1.ColorRGB.getRandom();
         model = circleModelBuilder.buildModel(gl);
-        actor = new msb_web_1.NatureDimActor(model);
-        actor.location = msb_web_1.Vector.getRandom(stageContainer);
-        actor.speedLimit = 0.05;
-        actor.mass = mass;
-        actor.applyForce(msb_web_1.Vector.getRandom(forceContainer));
-        natureScene.addActor(actor);
+        mover = new msb_web_1.NatureMover();
+        mover.location = msb_web_1.Vector.getRandom(stageContainer);
+        mover.speedLimit = 0.05;
+        mover.mass = mass;
+        mover.applyForce(msb_web_1.Vector.getRandom(forceContainer));
+        actor = new msb_web_1.NatureDimActor(model, mover);
+        natureScene.actorArray.push(actor);
     }
+    natureScene.init(gl, program);
     return natureScene;
 }
 exports.buildScene = buildScene;
@@ -3601,13 +3651,11 @@ var scene_1 = __webpack_require__(3);
         uSceneId = gl.getUniformLocation(program, "u_SceneId");
         uResolution = gl.getUniformLocation(program, "u_Resolution");
         gl.uniform2fv(uResolution, new Float32Array([stage.width, stage.height]));
-        natureScene = scene_1.buildScene(gl);
-        natureScene.scene.init(gl, program);
+        natureScene = scene_1.buildScene(gl, program);
     }
     function render() {
         gl.clear(gl.COLOR_BUFFER_BIT);
-        natureScene.update();
-        natureScene.render(gl);
+        natureScene.updateRender(gl);
         window.requestAnimationFrame(render);
     }
     init();

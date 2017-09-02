@@ -1,25 +1,27 @@
 import {
     ColorRGB,
     Container,
+    DimModel,
     DimCircleModelBuilder,
     NatureContainer,
     NatureDimActor,
     NatureDimScene,
+    NatureMover,
     normalGaussianGenerator,
     Vector
 } from "msb-web";
 
-export function buildScene(gl: WebGLRenderingContext){
+export function buildScene(gl: WebGLRenderingContext, program: WebGLProgram){
 
     let natureScene = new NatureDimScene(),
-        model, actor, mass,
+        model: DimModel, mover: NatureMover, actor: NatureDimActor, mass,
         circleModelBuilder = new DimCircleModelBuilder(0.5, 5),
         stageContainer: Container = new Container(-1.0, 1.0, -1.0, 1.0),
         forceContainer: Container = new Container(-0.001, 0.001, -0.001, 0.001),
         massGenerator: Function = normalGaussianGenerator(0.01, 0.05);
 
-    natureScene.scene.colorSize = 4;
-    natureScene.scene.hasTransformation = true;
+    natureScene.colorSize = 4;
+    natureScene.hasTransformation = true;
     natureScene.container = new NatureContainer(stageContainer);
     natureScene.container.constrainBounce = true;
 
@@ -31,14 +33,18 @@ export function buildScene(gl: WebGLRenderingContext){
 
         model = circleModelBuilder.buildModel(gl);
 
-        actor = new NatureDimActor(model);
-        actor.location = Vector.getRandom(stageContainer);
-        actor.speedLimit = 0.05;
-        actor.mass = mass;
-        actor.applyForce(Vector.getRandom(forceContainer));
+        mover = new NatureMover();
+        mover.location = Vector.getRandom(stageContainer);
+        mover.speedLimit = 0.05;
+        mover.mass = mass;
+        mover.applyForce(Vector.getRandom(forceContainer));
 
-        natureScene.addActor(actor);
+        actor = new NatureDimActor(model, mover);
+
+        natureScene.actorArray.push(actor);
     }
+
+    natureScene.init(gl, program);
 
     return natureScene;
 }

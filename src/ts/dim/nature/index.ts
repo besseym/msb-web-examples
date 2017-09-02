@@ -70,16 +70,14 @@ import {buildScene} from "./scene";
         uResolution = gl.getUniformLocation(program, "u_Resolution");
         gl.uniform2fv(uResolution, new Float32Array([stage.width, stage.height]));
 
-        natureScene = buildScene(gl);
-        natureScene.scene.init(gl, program);
+        natureScene = buildScene(gl, program);
     }
 
     function render(): void {
 
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        natureScene.update();
-        natureScene.render(gl);
+        natureScene.updateRender(gl);
 
         window.requestAnimationFrame(render);
     }
