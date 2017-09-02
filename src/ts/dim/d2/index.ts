@@ -1,9 +1,45 @@
 
-import {getWebGLRenderingContext, compileShaders} from "msb-web";
+import {
+    createProgram,
+    createProgramByShaderElements,
+    getWebGLRenderingContext
+} from "msb-web";
 
 import {buildRectangleScene} from "./factory";
 
 (function(){
+
+    let vertexShaderSrc = `
+        
+            uniform int u_SceneId;
+    
+            attribute vec4 a_Position_1;
+            attribute vec4 a_Color_1;
+    
+            varying vec4 v_Color;
+    
+            void
+            main()
+            {
+                gl_Position = a_Position_1;
+                v_Color = a_Color_1;
+            }
+        `,
+        fragmentShaderSrc = `
+            
+            precision mediump float;
+
+            uniform vec2 u_Resolution;
+    
+            varying vec4 v_Color;
+    
+            void
+            main()
+            {
+                //gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+                gl_FragColor = v_Color;
+            }
+        `;
 
     let gl: WebGLRenderingContext,
         program: WebGLProgram,
@@ -26,7 +62,7 @@ import {buildRectangleScene} from "./factory";
         gl.viewport(0, 0, stage.width, stage.height);
         gl.clearColor(0.8, 0.8, 0.8, 1.0);
 
-        program = compileShaders(gl, "vertex-shader", "fragment-shader");
+        program = createProgram(gl, vertexShaderSrc, fragmentShaderSrc);
         gl.useProgram(program);
 
         uSceneId = gl.getUniformLocation(program, "u_SceneId");

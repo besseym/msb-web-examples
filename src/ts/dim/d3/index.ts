@@ -3,7 +3,8 @@
  */
 
 import {
-    compileShaders,
+    createProgram,
+    createProgramByShaderElements,
     DimEye,
     getWebGLRenderingContext,
     DimLight,
@@ -39,7 +40,7 @@ import {buildScene} from "./factory";
         // gl.enable(gl.BLEND);
         gl.enable(gl.DEPTH_TEST);
 
-        program = compileShaders(gl, "vertex-shader", "fragment-shader");
+        program = createProgramByShaderElements(gl, "vertex-shader", "fragment-shader");
         gl.useProgram(program);
 
         uSceneId = gl.getUniformLocation(program, "u_SceneId");
