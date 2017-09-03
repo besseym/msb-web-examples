@@ -1380,6 +1380,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
+	    DimSceneBase.prototype.loadSceneData = function (gl) {
+	        var sceneData = this.getSceneData();
+	        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferId);
+	        gl.bufferData(gl.ARRAY_BUFFER, utility_1.toDataArray(sceneData.elementDataArray), gl.STATIC_DRAW);
+	    };
 	    DimSceneBase.prototype.init = function (gl, glProgram) {
 	        var offset = 0, stride = Float32Array.BYTES_PER_ELEMENT * this.elementSize, sceneData = this.getSceneData();
 	        if (this.hasTransformation) {
@@ -1396,8 +1401,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.uShininess = gl.getUniformLocation(glProgram, "u_Shininess_" + this.id);
 	        }
 	        this.bufferId = gl.createBuffer();
-	        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferId);
-	        gl.bufferData(gl.ARRAY_BUFFER, utility_1.toDataArray(sceneData.elementDataArray), gl.STATIC_DRAW);
+	        this.loadSceneData(gl);
 	        this.aPosition = gl.getAttribLocation(glProgram, "a_Position_" + this.id);
 	        gl.vertexAttribPointer(this.aPosition, this.vertexSize, gl.FLOAT, false, stride, offset);
 	        offset = offset + this.vertexSize;
@@ -1411,6 +1415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            gl.vertexAttribPointer(this.aNormal, this.normalSize, gl.FLOAT, false, stride, Float32Array.BYTES_PER_ELEMENT * offset);
 	            offset = offset + this.normalSize;
 	        }
+	        //enable attributes
 	        gl.enableVertexAttribArray(this.aPosition);
 	        if (this.colorSize > 0) {
 	            gl.enableVertexAttribArray(this.aColor);
@@ -3596,14 +3601,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var msb_web_1 = __webpack_require__(0);
-function buildScene(gl, program) {
-    var natureScene = new msb_web_1.NatureDimScene(), model, mover, actor, mass, circleModelBuilder = new msb_web_1.DimCircleModelBuilder(0.5, 5), stageContainer = new msb_web_1.Container(-1.0, 1.0, -1.0, 1.0), forceContainer = new msb_web_1.Container(-0.001, 0.001, -0.001, 0.001), massGenerator = msb_web_1.normalGaussianGenerator(0.01, 0.05);
-    natureScene.colorSize = 4;
-    natureScene.hasTransformation = true;
-    natureScene.container = new msb_web_1.NatureContainer(stageContainer);
-    natureScene.container.constrainBounce = true;
-    for (var a = 0; a < 50; a++) {
-        mass = massGenerator();
+function actorGeneratorCreator(stageContainer) {
+    var circleModelBuilder = new msb_web_1.DimCircleModelBuilder(0.5, 30), forceContainer = new msb_web_1.Container(-0.001, 0.001, -0.001, 0.001), massGenerator = msb_web_1.normalGaussianGenerator(0.01, 0.05);
+    return function (gl) {
+        var mass = massGenerator(), model, mover, actor;
         circleModelBuilder.radius = mass;
         circleModelBuilder.color = msb_web_1.ColorRGB.getRandom();
         model = circleModelBuilder.buildModel(gl);
@@ -3613,12 +3614,53 @@ function buildScene(gl, program) {
         mover.mass = mass;
         mover.applyForce(msb_web_1.Vector.getRandom(forceContainer));
         actor = new msb_web_1.NatureDimActor(model, mover);
-        natureScene.actorArray.push(actor);
-    }
-    natureScene.init(gl, program);
-    return natureScene;
+        return actor;
+    };
 }
-exports.buildScene = buildScene;
+var NatureExperience = (function () {
+    function NatureExperience(gl, program) {
+        var _this = this;
+        this.stageContainer = new msb_web_1.Container(-1.0, 1.0, -1.0, 1.0);
+        this.actorGenerator = actorGeneratorCreator(this.stageContainer);
+        this.scene = new msb_web_1.NatureDimScene();
+        this.scene.colorSize = 4;
+        this.scene.hasTransformation = true;
+        this.scene.container = new msb_web_1.NatureContainer(this.stageContainer);
+        this.scene.container.constrainBounce = true;
+        var intialActorCount = 50, actor;
+        for (var a = 0; a < intialActorCount; a++) {
+            actor = this.actorGenerator(gl);
+            this.scene.actorArray.push(actor);
+        }
+        this.scene.init(gl, program);
+        //input behavior
+        var inputActorCount = document.getElementById("input-actor-count"), outputActorCount = document.getElementById("actor-count");
+        inputActorCount.value = intialActorCount.toString();
+        outputActorCount.innerText = inputActorCount.value;
+        inputActorCount.addEventListener("input", function (e) {
+            outputActorCount.innerText = this.value;
+        });
+        inputActorCount.addEventListener("change", function (e) {
+            var newCount = parseInt(inputActorCount.value);
+            // outputActorCount.innerText = inputActorCount.value;
+            if (newCount < _this.scene.actorArray.length) {
+                var removeCount = _this.scene.actorArray.length - newCount;
+                _this.scene.actorArray.splice(newCount, removeCount);
+                _this.scene.loadSceneData(gl);
+            }
+            else if (newCount > _this.scene.actorArray.length) {
+                var addCount = newCount - _this.scene.actorArray.length;
+                for (var a = 0; a < addCount; a++) {
+                    actor = _this.actorGenerator(gl);
+                    _this.scene.actorArray.push(actor);
+                    _this.scene.loadSceneData(gl);
+                }
+            }
+        });
+    }
+    return NatureExperience;
+}());
+exports.NatureExperience = NatureExperience;
 
 
 /***/ }),
@@ -3631,10 +3673,10 @@ exports.buildScene = buildScene;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var msb_web_1 = __webpack_require__(0);
-var scene_1 = __webpack_require__(3);
+var experience_1 = __webpack_require__(3);
 (function () {
     var vertexShaderSrc = "\n        \n            uniform int u_SceneId;\n            \n            uniform mat4 u_TranslationMatrix_1;\n            \n            attribute vec4 a_Position_1;\n            attribute vec4 a_Color_1;\n    \n            varying vec4 v_Color;\n    \n            void\n            main()\n            {\n                mat4 modelMatrix = u_TranslationMatrix_1;\n            \n                gl_Position = modelMatrix * a_Position_1;\n                v_Color = a_Color_1;\n            }\n        ", fragmentShaderSrc = "\n            \n            precision mediump float;\n    \n            varying vec4 v_Color;\n    \n            void\n            main()\n            {\n                gl_FragColor = v_Color;\n            }\n        ";
-    var gl, program, uSceneId, uResolution, natureScene;
+    var gl, program, uSceneId, uResolution, natureExperience;
     function init() {
         var stage = document.getElementById("stage");
         if (stage === undefined) {
@@ -3651,11 +3693,11 @@ var scene_1 = __webpack_require__(3);
         uSceneId = gl.getUniformLocation(program, "u_SceneId");
         uResolution = gl.getUniformLocation(program, "u_Resolution");
         gl.uniform2fv(uResolution, new Float32Array([stage.width, stage.height]));
-        natureScene = scene_1.buildScene(gl, program);
+        natureExperience = new experience_1.NatureExperience(gl, program);
     }
     function render() {
         gl.clear(gl.COLOR_BUFFER_BIT);
-        natureScene.updateRender(gl);
+        natureExperience.scene.updateRender(gl);
         window.requestAnimationFrame(render);
     }
     init();

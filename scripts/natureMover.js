@@ -1381,6 +1381,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        enumerable: true,
 	        configurable: true
 	    });
+	    DimSceneBase.prototype.loadSceneData = function (gl) {
+	        var sceneData = this.getSceneData();
+	        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferId);
+	        gl.bufferData(gl.ARRAY_BUFFER, utility_1.toDataArray(sceneData.elementDataArray), gl.STATIC_DRAW);
+	    };
 	    DimSceneBase.prototype.init = function (gl, glProgram) {
 	        var offset = 0, stride = Float32Array.BYTES_PER_ELEMENT * this.elementSize, sceneData = this.getSceneData();
 	        if (this.hasTransformation) {
@@ -1397,8 +1402,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.uShininess = gl.getUniformLocation(glProgram, "u_Shininess_" + this.id);
 	        }
 	        this.bufferId = gl.createBuffer();
-	        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferId);
-	        gl.bufferData(gl.ARRAY_BUFFER, utility_1.toDataArray(sceneData.elementDataArray), gl.STATIC_DRAW);
+	        this.loadSceneData(gl);
 	        this.aPosition = gl.getAttribLocation(glProgram, "a_Position_" + this.id);
 	        gl.vertexAttribPointer(this.aPosition, this.vertexSize, gl.FLOAT, false, stride, offset);
 	        offset = offset + this.vertexSize;
@@ -1412,6 +1416,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            gl.vertexAttribPointer(this.aNormal, this.normalSize, gl.FLOAT, false, stride, Float32Array.BYTES_PER_ELEMENT * offset);
 	            offset = offset + this.normalSize;
 	        }
+	        //enable attributes
 	        gl.enableVertexAttribArray(this.aPosition);
 	        if (this.colorSize > 0) {
 	            gl.enableVertexAttribArray(this.aColor);

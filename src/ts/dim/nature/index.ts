@@ -4,7 +4,7 @@ import {
     getWebGLRenderingContext
 } from "msb-web";
 
-import {buildScene} from "./scene";
+import {NatureExperience} from "./experience";
 
 (function(){
 
@@ -44,7 +44,7 @@ import {buildScene} from "./scene";
     let gl: WebGLRenderingContext,
         program: WebGLProgram,
         uSceneId, uResolution,
-        natureScene;
+        natureExperience;
 
     function init(): void {
 
@@ -70,14 +70,14 @@ import {buildScene} from "./scene";
         uResolution = gl.getUniformLocation(program, "u_Resolution");
         gl.uniform2fv(uResolution, new Float32Array([stage.width, stage.height]));
 
-        natureScene = buildScene(gl, program);
+        natureExperience = new NatureExperience(gl, program);
     }
 
     function render(): void {
 
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        natureScene.updateRender(gl);
+        natureExperience.scene.updateRender(gl);
 
         window.requestAnimationFrame(render);
     }
