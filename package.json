@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Examples using the msb-web library",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "msb-web": "^1.0.0"
+  },
   "devDependencies": {
     "tslint": "^5.1.0",
     "ts-loader": "^2.0.3",
