@@ -13,7 +13,10 @@ let stage: HTMLCanvasElement,
 stage = <HTMLCanvasElement> document.getElementById("stage");
 context = stage.getContext("2d");
 
-let clock = new NatureClock(new Vector(stage.width/2, stage.height/2), 200);
+let w = stage.width/2,
+    h = stage.height/2,
+    r = Math.max(w, h) * .7,
+    clock = new NatureClock(new Vector(stage.width/2, stage.height/2), r);
 
 function render(){
 
